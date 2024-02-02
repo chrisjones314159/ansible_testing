@@ -1,0 +1,114 @@
+---
+- name: Install stuff
+  hosts: virtualmachines
+  become: true
+  tasks:
+
+    - name: Install wget on both VMs
+      package:
+        name: wget
+        state: present
+
+    - name: Install unzip on VM01
+      package:
+        name: unzip
+        state: present
+      when: ansible_host == "13.42.4.250"
+
+    - name: Install Nginx on VM02
+      package:
+        name: nginx
+        state: present        
+      when: ansible_host == "35.178.59.165"
+
+- name: Extra tasks
+  hosts: virtualmachines
+  become: true
+  tasks:
+
+    - name: Install Nginx on VM02
+      package:
+        name: nginx
+        state: present        
+      when: ansible_host == "13.42.4.250"
+      register: nginx_install
+
+    - name: Copy Nginx HTML across
+      copy:
+        src: "files/page.html"
+        dest: "/var/www/html/index.nginx-debian.html"
+      when: ansible_host == "13.42.4.250"
+
+    - name: Restart Nginx
+      service: 
+        name: nginx
+        state: restarted
+      when: ansible_host == "13.42.4.250"
+
+    - name: Print Install output
+      debug:
+        msg: "{{ nginx_install }}"
+      when: ansible_host == "13.42.4.250"
+
+- name: Docker with modules
+  hosts: vm01
+  become: true
+  tasks:
+
+    - name: Install Pre-requisities
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "apt-transport-https"
+        - "ca-certificates"
+        - "curl"
+        - "software-properties-common"
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present 
+
+    - name: Add Docker repo
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Install Docker ce
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "docker-ce"
+        - "docker-ce-cli"
+        - "containerd.io"
+
+    - name: Install Docker-compose pre-requisities
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - "python3-pip"
+        - "python3-setuptools"
+        - "virtualenv"
+
+    - name: Install Docker compose
+      pip:
+        name: docker-compose
+
+    - name: Restart Docker
+      service: 
+        name: docker
+        state: restarted
+
+- name: Docker with modules
+  hosts: vm02
+  become: true
+  tasks:
+
+    - name: Download the Docker script
+      shell: "curl -fsSL https://get.docker.com -o install-docker.sh"
+
+    - name: Run the script
+      shell: "sh install-docker.sh"

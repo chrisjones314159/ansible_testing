@@ -1,0 +1,32 @@
+---
+# tasks file for new-role
+
+- name: Create 'devs' group
+  group:
+    name: devs
+    state: present
+
+- name: Add a user to the devs group
+  user: 
+    name: chris
+    group: devs
+    state: present
+
+- name: Install zsh & curl
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - zsh
+    - curl
+
+- name: Install Nginx
+  apt: 
+    name: nginx
+    state: present
+
+- name: Copy html across
+  copy: 
+    src: files/index.html
+    dest: /var/www/html/index.nginx.debian.html
+  notify: restart nginx

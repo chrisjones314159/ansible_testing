@@ -1,0 +1,38 @@
+---
+# tasks file for jenkins
+
+# - name: Install dependencies
+#   apt:
+#     name: openjdk-11-jdk
+#     state: present
+#     update_cache: true
+
+# - name: Add Jenkins GPG key
+#   apt_key:
+#     url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
+#     state: present 
+
+# - name: Add Jenkins repo
+#   apt_repository:
+#     repo: deb https://pkg.origin.jenkins.io/debian binary/
+#     state: present
+
+# - name: add jenkins repo
+#   shell: "echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null"
+
+# - name: update
+#   shell: apt-get update
+
+# - name: Install 
+#   apt:
+#     name: "fontconfig openjdk-17-jre"
+#     state: present
+
+# - name: in
+#   shell: sudo apt-get install jenkins
+
+- name: Install Jenkins
+  apt:
+    name: jenkins
+    state: present
+  # notify: restart jenkins

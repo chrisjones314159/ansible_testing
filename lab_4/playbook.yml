@@ -1,0 +1,49 @@
+---
+- name: lab4
+  hosts: localhost
+  become: true
+  vars_files:
+    - vars.yml
+  vars:
+    - name: chris2
+  vars_prompt:
+    - name: package_name
+      prompt: What package do you want to install?
+  tasks:
+
+    - name: Print name to console
+      debug:
+        msg: "My name is {{ name }}"
+
+    - name: Clone down repo
+      git: 
+        repo: https://gitlab.com/Reece-Elder/devops-m5-s3.git
+        dest: cloned_down/
+
+    - name: Install a package if non specified at cmd line its unzip
+      package: 
+        name: "{{ package_name | default('unzip')}}"
+        state: present
+
+    - name: Install Nginx
+      package: 
+        name: nginx
+        state: present
+      notify: restart nginx
+
+    - name: Create a file
+      file:
+        path: new.txt
+        state: touch
+
+    - name: add line
+      lineinfile:
+        path: new.txt
+        line: "this is a new line"
+
+
+  handlers: 
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

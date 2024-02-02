@@ -1,0 +1,7 @@
+---
+- name: Run role on host a
+  hosts: ec2
+  become: true
+  roles:
+    - new-role
+    - jenkins
